@@ -1,3 +1,3 @@
 # Biorhythm
 
-Just another Bioryhthm charting program to show the use of matplotlib and side panel for inputting. 
+Just another Biorhythm charting program to show the use of matplotlib and side panel for inputting. 
