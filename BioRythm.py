@@ -183,7 +183,7 @@ class InputForm(wx.Frame):
              sin(2*pi*(t-t0)/33), sin(2*pi*(t-t0)/38),
              sin(2*pi*(t-t0)/48))
 
-        # converting ordinals to date
+        # converting ordinals to date format
         label = []
         for p in t:
             label.append(date.fromordinal(p))
