@@ -45,6 +45,7 @@ class InputForm(wx.Frame):
 
         self.lblstart = wx.StaticText(self, label="  Plot Start Date:  ")
         yy, mm, dd = [int(i) for i in str(date.today()).split('-')]
+        # set default start date to present day
         strtdate = str(dd) + '/' + str(mm) + '/' + str(yy)
         self.editstart = wx.StaticText(self, label=strtdate)
         self.calstart = wx.Button(self, id=wx.ID_ANY, size=(45, 35))
@@ -52,6 +53,7 @@ class InputForm(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnCalstart, self.calstart)
 
         self.lblspan = wx.StaticText(self, label="  Days in Plot:")
+        # Set a default value of 30 days
         self.editspan = wx.TextCtrl(self, value="30", size=(140, 35))
 
         gbs.Add(self.lblname, pos=(0, 0), flag=wx.EXPAND)
@@ -68,6 +70,7 @@ class InputForm(wx.Frame):
         gbs.Add(self.lblspan, pos=(3, 0), flag=wx.EXPAND)
         gbs.Add(self.editspan, pos=(3, 1), flag=wx.EXPAND)
 
+        # set up the check boxs for the charts to be ploted
         hdr1 = wx.StaticText(self, id=wx.ID_ANY, label='Primary\nCurves')
         hdr2 = wx.StaticText(self, id=wx.ID_ANY, label='Seconary\nCurves')
         self.cb1 = wx.CheckBox(self, label='Physical')
@@ -77,6 +80,10 @@ class InputForm(wx.Frame):
         self.cb5 = wx.CheckBox(self, label='Awareness')
         self.cb6 = wx.CheckBox(self, label='Wisdom')
         self.cb7 = wx.CheckBox(self, label='Passion')
+        # set the primary charts checkboxs
+        self.cb1.SetValue(True)
+        self.cb2.SetValue(True)
+        self.cb3.SetValue(True)
         gbs.Add(hdr1, pos=(4, 0), flag=wx.EXPAND)
         gbs.Add(hdr2, pos=(4, 1), flag=wx.EXPAND)
         gbs.Add(self.cb1, pos=(5, 0), flag=wx.EXPAND)
@@ -88,8 +95,10 @@ class InputForm(wx.Frame):
         gbs.Add(self.cb7, pos=(8, 1), flag=wx.EXPAND)
 
         btnsizer = wx.BoxSizer(wx.HORIZONTAL)
+        # add button to plot curves
         self.primary = wx.Button(self, id=wx.ID_ANY,
                                  label="Plot Selected\nCurves")
+        # add button to open document explaining BIORHYTHM charts
         biodoc = wx.Button(self, id=wx.ID_ANY, label='Review\nDocumentation')
         xit = wx.Button(self, id=wx.ID_ANY, label="Exit")
 
@@ -139,6 +148,7 @@ class InputForm(wx.Frame):
         self.toolbar.update()
 
     def OnPrimary(self, evt):
+        # clear any previuos plot and then calculate new curves
         self.axes.clear()
 
         # get DOB from editDOB
@@ -160,6 +170,7 @@ class InputForm(wx.Frame):
             wx.MessageBox('Plot span has defaulted to 30 days!',
                           'Info', wx.OK | wx.ICON_INFORMATION)
 
+        # set the span of days for the curves
         plot_span = int(self.editspan.GetValue())
         t = array(range(t1-1, t1 + plot_span))
 
@@ -172,34 +183,36 @@ class InputForm(wx.Frame):
              sin(2*pi*(t-t0)/33), sin(2*pi*(t-t0)/38),
              sin(2*pi*(t-t0)/48))
 
-        av3 = (y[0]+y[1]+y[2])/3.
-
         # converting ordinals to date
         label = []
         for p in t:
             label.append(date.fromordinal(p))
+        # list of names to be included in plot legend
         lgnd = []
-        av3 = 0
+        # value calculated for average of primary curves
+        avg_prim = 0
         if self.cb1.GetValue():
             self.ax.plot(label, y[0], color="red", linewidth=3, alpha=.7)
-            av3 = y[0]
+            avg_prim = y[0]
             lgnd.append('Physical')
         if self.cb2.GetValue():
             self.ax.plot(label, y[1], color="blue", linewidth=3, alpha=.7)
-            av3 = av3 + y[1]
+            avg_prim = avg_prim + y[1]
             lgnd.append('Emotional')
         if self.cb3.GetValue():
             self.ax.plot(label, y[2], color="green", linewidth=3, alpha=.7)
-            av3 = av3 + y[3]
+            avg_prim = avg_prim + y[3]
             lgnd.append('Intellectual')
 
+        # determine how many primary curves there are in the average
         cbsum = (int(self.cb1.GetValue() == 1) +
                  int(self.cb2.GetValue() == 1) +
                  int(self.cb3.GetValue() == 1))
-        # if all the primaries are ploted plot the average
-        if cbsum > 2:
-            av3 = av3 / cbsum
-            self.ax.plot(label, av3, linewidth=2,
+        # if 2 of the primaries are ploted, plot the average
+        # note the average curve may overlay the passion or wisdom curve
+        if cbsum > 1:
+            avg_prim = avg_prim / cbsum
+            self.ax.plot(label, avg_prim, linewidth=2,
                          linestyle="dashed", color="black")
             lgnd.append('Average\nPrimaries')
         # plot the intuitive curve
@@ -235,9 +248,6 @@ class InputForm(wx.Frame):
                            self.editDOB.GetLabel()))
 
         self.canvas.draw()
-
-        fn = self.editname.GetValue() + ".pdf"
-        plt.savefig(fn, dpi=120, format='pdf')
 
     def OnView(self, evt):
         import webbrowser as wb
