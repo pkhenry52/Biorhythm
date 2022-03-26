@@ -39,22 +39,28 @@ class InputForm(wx.Frame):
         self.lblDOB = wx.StaticText(self, label="  Date of Birth: *")
         self.editDOB = wx.StaticText(self, label='')
         bmp = wx.Bitmap('btn_cal.ico')
-        self.calDOB = wx.Button(self, id=wx.ID_ANY, size=(45, 35))
+        self.calDOB = wx.Button(self, id=101, size=(45, 35))
         self.calDOB.SetBitmap(bmp)
-        self.Bind(wx.EVT_BUTTON, self.OnCalDOB, self.calDOB)
+        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calDOB)
 
         self.lblstart = wx.StaticText(self, label="  Plot Start Date:  ")
         yy, mm, dd = [int(i) for i in str(date.today()).split('-')]
         # set default start date to present day
-        strtdate = str(dd) + '/' + str(mm) + '/' + str(yy)
-        self.editstart = wx.StaticText(self, label=strtdate)
-        self.calstart = wx.Button(self, id=wx.ID_ANY, size=(45, 35))
+        todaydate = str(dd) + '/' + str(mm) + '/' + str(yy)
+        self.editstart = wx.StaticText(self, label=todaydate)
+        self.calstart = wx.Button(self, id=102, size=(45, 35))
         self.calstart.SetBitmap(bmp)
-        self.Bind(wx.EVT_BUTTON, self.OnCalstart, self.calstart)
+        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calstart)
 
         self.lblspan = wx.StaticText(self, label="  Days in Plot:")
         # Set a default value of 30 days
         self.editspan = wx.TextCtrl(self, value="30", size=(140, 35))
+
+        self.lblinter = wx.StaticText(self, label="  Date of Interest:  ")
+        self.editinter = wx.StaticText(self, label=todaydate)
+        self.calinter = wx.Button(self, id=103, size=(45, 35))
+        self.calinter.SetBitmap(bmp)
+        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calinter)        
 
         gbs.Add(self.lblname, pos=(0, 0), flag=wx.EXPAND)
         gbs.Add(self.editname, pos=(0, 1), flag=wx.EXPAND)
@@ -70,6 +76,10 @@ class InputForm(wx.Frame):
         gbs.Add(self.lblspan, pos=(3, 0), flag=wx.EXPAND)
         gbs.Add(self.editspan, pos=(3, 1), flag=wx.EXPAND)
 
+        gbs.Add(self.lblinter, pos=(4, 0), flag=wx.EXPAND)
+        gbs.Add(self.editinter, pos=(4, 1), flag=wx.EXPAND)
+        gbs.Add(self.calinter, pos=(4, 2), flag=wx.EXPAND)        
+
         # set up the check boxs for the charts to be ploted
         hdr1 = wx.StaticText(self, id=wx.ID_ANY, label='Primary\nCurves')
         hdr2 = wx.StaticText(self, id=wx.ID_ANY, label='Seconary\nCurves')
@@ -84,15 +94,15 @@ class InputForm(wx.Frame):
         self.cb1.SetValue(True)
         self.cb2.SetValue(True)
         self.cb3.SetValue(True)
-        gbs.Add(hdr1, pos=(4, 0), flag=wx.EXPAND)
-        gbs.Add(hdr2, pos=(4, 1), flag=wx.EXPAND)
-        gbs.Add(self.cb1, pos=(5, 0), flag=wx.EXPAND)
-        gbs.Add(self.cb2, pos=(6, 0), flag=wx.EXPAND)
-        gbs.Add(self.cb3, pos=(7, 0), flag=wx.EXPAND)
-        gbs.Add(self.cb4, pos=(5, 1), flag=wx.EXPAND)
-        gbs.Add(self.cb5, pos=(6, 1), flag=wx.EXPAND)
-        gbs.Add(self.cb6, pos=(7, 1), flag=wx.EXPAND)
-        gbs.Add(self.cb7, pos=(8, 1), flag=wx.EXPAND)
+        gbs.Add(hdr1, pos=(5, 0), flag=wx.EXPAND)
+        gbs.Add(hdr2, pos=(5, 1), flag=wx.EXPAND)
+        gbs.Add(self.cb1, pos=(6, 0), flag=wx.EXPAND)
+        gbs.Add(self.cb2, pos=(7, 0), flag=wx.EXPAND)
+        gbs.Add(self.cb3, pos=(8, 0), flag=wx.EXPAND)
+        gbs.Add(self.cb4, pos=(6, 1), flag=wx.EXPAND)
+        gbs.Add(self.cb5, pos=(7, 1), flag=wx.EXPAND)
+        gbs.Add(self.cb6, pos=(8, 1), flag=wx.EXPAND)
+        gbs.Add(self.cb7, pos=(9, 1), flag=wx.EXPAND)
 
         btnsizer = wx.BoxSizer(wx.HORIZONTAL)
         # add button to plot curves
@@ -134,12 +144,16 @@ class InputForm(wx.Frame):
         self.Show(True)
         self.Maximize(True)
 
-    def OnCalDOB(self, evt):
-        dlg = MyCalendar(self, 'D.O.B.')
-        dlg.ShowModal()
+    def OnCal(self, evt):
+        btn_id = str(evt.GetId())
+        if btn_id == '101':
+            ttl = 'D.O.B.'
+        elif btn_id == '102':
+            ttl = 'Plot Start Date'
+        else:
+            ttl = 'Date of Interest'
 
-    def OnCalstart(self, evt):
-        dlg = MyCalendar(self, 'Start Date')
+        dlg = MyCalendar(self, ttl, btn_id)
         dlg.ShowModal()
 
     def add_toolbar(self):
@@ -164,7 +178,7 @@ class InputForm(wx.Frame):
         dd, mm, yy = [int(i) for i in self.editstart.GetLabel().split('/')]
         t1 = date(yy, mm, dd).toordinal()
 
-        # calulate range date using editspan
+        # calculate range date using editspan
         if self.editspan.GetValue() == '':
             self.editspan.SetValue('30')
             wx.MessageBox('Plot span has defaulted to 30 days!',
@@ -173,6 +187,19 @@ class InputForm(wx.Frame):
         # set the span of days for the curves
         plot_span = int(self.editspan.GetValue())
         t = array(range(t1-1, t1 + plot_span))
+
+        # list of names to be included in plot legend
+        lgnd = []
+
+        # get date of interest from editinter
+        dd, mm, yy = [int(i) for i in self.editinter.GetLabel().split('/')]
+        t4 = date(yy, mm, dd)
+        if t4.toordinal() < t1 or t4.toordinal() > t1 + int(self.editspan.GetValue()):
+            wx.MessageBox('Date of Interest is outside plot envelope', 'Info', wx.OK | wx.ICON_INFORMATION)
+        else:
+            # plot a vertical line at the date of interest
+            lgnd.append('Date of\nInterest')
+            self.ax.axvline(t4, color='magenta', linestyle='--', linewidth=2)
 
         # the y coordinates for the various curves
         # [physical, emotional, intellectual, intuitive, awareness]
@@ -187,8 +214,7 @@ class InputForm(wx.Frame):
         label = []
         for p in t:
             label.append(date.fromordinal(p))
-        # list of names to be included in plot legend
-        lgnd = []
+
         # value calculated for average of primary curves
         avg_prim = 0
         if self.cb1.GetValue():
@@ -258,12 +284,13 @@ class InputForm(wx.Frame):
 
 
 class MyCalendar(wx.Dialog):
-    def __init__(self, parent, ttl):
+    def __init__(self, parent, ttl, btn_id):
 
         super(MyCalendar, self).__init__(parent, title=ttl, size=(220, 250))
         panel = wx.Panel(self)
         self.title = ttl
         self.parent = parent
+        self.btn_id = str(btn_id)
 
         calsizer = wx.BoxSizer(wx.VERTICAL)
         self.caldate = CalendarCtrl(
@@ -272,8 +299,11 @@ class MyCalendar(wx.Dialog):
             date=wx.DateTime().Today(),
             style=wx.adv.CAL_SEQUENTIAL_MONTH_SELECTION
             )
-        if self.title == 'D.O.B.':
+
+        # set an initial calander start date to Jan 1 1975
+        if self.btn_id == '101':
             self.caldate.SetDate(wx.DateTime.FromDMY(1, 0, 1975))
+
         self.btn = wx.Button(panel, label="OK", size=(100, 35))
         calsizer.Add(self.caldate, 0, wx.EXPAND)
         calsizer.Add((10, 20))
@@ -290,10 +320,13 @@ class MyCalendar(wx.Dialog):
         yr = seldate.GetYear()
         datestr = str(day) + '/' + str(mth) + '/' + str(yr)
 
-        if self.title == 'D.O.B.':
+        # set the corresponding adte labels to the selected calender date
+        if self.btn_id == '101':
             self.parent.editDOB.SetLabel(datestr)
-        elif self.title == 'Start Date':
+        elif self.btn_id == '102':
             self.parent.editstart.SetLabel(datestr)
+        elif self.btn_id == '103':
+            self.parent.editinter.SetLabel(datestr)
         self.Close()
 
 
