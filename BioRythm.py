@@ -1,7 +1,6 @@
 
 import wx
 import os
-import pathlib
 
 import wx.adv
 from wx.adv import CalendarCtrl
@@ -33,14 +32,14 @@ class InputForm(wx.Frame):
         # add the sizer for the left side widgets
         sizerL = wx.BoxSizer(wx.VERTICAL)
 
-        gbs = wx.GridBagSizer(15, 15)
+        gbs = wx.GridBagSizer(10, 15)
 
         self.lblname = wx.StaticText(self, label="  Your name:")
         self.editname = wx.TextCtrl(self, value=" ", size=(140, 35))
 
         self.lblDOB = wx.StaticText(self, label="  Date of Birth: *")
         self.editDOB = wx.StaticText(self, label='')
-        bmp = wx.Bitmap(os.path.join(pathlib.Path(__file__).resolve().parent, 'btnCal.ico'))
+        bmp = wx.Bitmap(os.getcwd() + os.sep + 'btnCal.ico')
         self.calDOB = wx.Button(self, id=101, size=(45, 35))
         self.calDOB.SetBitmap(bmp)
         self.Bind(wx.EVT_BUTTON, self.OnCal, self.calDOB)
@@ -106,25 +105,32 @@ class InputForm(wx.Frame):
         gbs.Add(self.cb6, pos=(8, 1), flag=wx.EXPAND)
         gbs.Add(self.cb7, pos=(9, 1), flag=wx.EXPAND)
 
-        btnsizer = wx.BoxSizer(wx.HORIZONTAL)
+#        btnsizer = wx.BoxSizer(wx.HORIZONTAL)
         # add button to plot curves
         self.primary = wx.Button(self, id=wx.ID_ANY,
                                  label="Plot Selected\nCurves")
         # add button to open document explaining BIORHYTHM charts
         biodoc = wx.Button(self, id=wx.ID_ANY, label='Review\nDocumentation')
         xit = wx.Button(self, id=wx.ID_ANY, label="Exit")
+        samples = wx.Button(self, id=wx.ID_ANY, label='Sample\nInterpretations')
 
-        btnsizer.Add(self.primary, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        btnsizer.Add(biodoc, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        btnsizer.Add(xit, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+#        btnsizer.Add(self.primary, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+#        btnsizer.Add(biodoc, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+#        btnsizer.Add(xit, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         self.Bind(wx.EVT_BUTTON, self.OnExit, xit)
         self.Bind(wx.EVT_BUTTON, self.OnPrimary, self.primary)
         self.Bind(wx.EVT_BUTTON, self.OnView, biodoc)
+        self.Bind(wx.EVT_BUTTON, self.OnSamples, samples)
+
+        gbs.Add(self.primary, pos=(10, 0), flag=wx.EXPAND)
+        gbs.Add(biodoc, pos=(10, 1), flag=wx.EXPAND)
+        gbs.Add(xit, pos=(10, 2), flag=wx.EXPAND)
+        gbs.Add(samples, pos=(11, 1), flag=wx.EXPAND)
 
         sizerL.Add(15, 15)
         sizerL.Add(gbs, 1, wx.ALIGN_CENTER)
-        sizerL.Add(btnsizer, 1, wx.ALIGN_CENTER, wx.EXPAND)
+#        sizerL.Add(btnsizer, 1, wx.ALIGN_CENTER, wx.EXPAND)
 
         sizerR = wx.BoxSizer(wx.VERTICAL)
         # add the draw panel
@@ -278,8 +284,42 @@ class InputForm(wx.Frame):
         self.canvas.draw()
 
     def OnView(self, evt):
-        import webbrowser as wb
-        wb.open_new(os.path.join(pathlib.Path(__file__).resolve().parent, 'BiorhythmsChart.pdf'))
+        import webbrowser
+
+        filename = (os.getcwd() + os.sep + 'BiorhythmsChart.pdf')
+
+        html_path = 'file:' + os.sep*2 + filename
+
+        brwsrs = ['firefox', 'safari', 'chrome', 'opera',
+                    'netscape', 'google-chrome', 'lynx',
+                    'mozilla', 'galeon', 'chromium',
+                    'chromium-browser', 'windows-default',
+                    'w3m', 'no browser']
+        for brwsr in brwsrs:
+            try:
+                webbrowser.get(using=brwsr).open(html_path, new=2)
+                break
+            except Exception:
+                pass
+
+    def OnSamples(self, evt):
+        import webbrowser
+
+        filename = (os.getcwd() + os.sep + 'Bio015.pdf')
+
+        html_path = 'file:' + os.sep*2 + filename
+
+        brwsrs = ['firefox', 'safari', 'chrome', 'opera',
+                    'netscape', 'google-chrome', 'lynx',
+                    'mozilla', 'galeon', 'chromium',
+                    'chromium-browser', 'windows-default',
+                    'w3m', 'no browser']
+        for brwsr in brwsrs:
+            try:
+                webbrowser.get(using=brwsr).open(html_path, new=2)
+                break
+            except Exception:
+                pass
 
     def OnExit(self, evt):
         self.Destroy()
