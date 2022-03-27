@@ -1,5 +1,7 @@
 
 import wx
+import os
+import sys
 
 import wx.adv
 from wx.adv import CalendarCtrl
@@ -38,7 +40,7 @@ class InputForm(wx.Frame):
 
         self.lblDOB = wx.StaticText(self, label="  Date of Birth: *")
         self.editDOB = wx.StaticText(self, label='')
-        bmp = wx.Bitmap('btnCal.ico')
+        bmp = wx.Bitmap(os.path.join(sys.path[0], 'btnCal.ico'))
         self.calDOB = wx.Button(self, id=101, size=(45, 35))
         self.calDOB.SetBitmap(bmp)
         self.Bind(wx.EVT_BUTTON, self.OnCal, self.calDOB)
@@ -277,7 +279,7 @@ class InputForm(wx.Frame):
 
     def OnView(self, evt):
         import webbrowser as wb
-        wb.open_new('BiorhythmsChart.pdf')
+        wb.open_new(os.path.join(sys.path[0], 'BiorhythmsChart.pdf'))
 
     def OnExit(self, evt):
         self.Destroy()
