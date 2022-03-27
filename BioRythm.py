@@ -38,7 +38,7 @@ class InputForm(wx.Frame):
 
         self.lblDOB = wx.StaticText(self, label="  Date of Birth: *")
         self.editDOB = wx.StaticText(self, label='')
-        bmp = wx.Bitmap('btn_cal.ico')
+        bmp = wx.Bitmap('btnCal.ico')
         self.calDOB = wx.Button(self, id=101, size=(45, 35))
         self.calDOB.SetBitmap(bmp)
         self.Bind(wx.EVT_BUTTON, self.OnCal, self.calDOB)
