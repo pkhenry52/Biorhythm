@@ -55,8 +55,8 @@ class InputForm(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnCal, self.calstart)
 
         self.lblspan = wx.StaticText(self, label="  Days in Plot:")
-        # Set a default value of 30 days
-        self.editspan = wx.TextCtrl(self, value="30", size=(140, 35))
+        # Set a default value of 29 days
+        self.editspan = wx.TextCtrl(self, value="29", size=(140, 35))
 
         self.lblinter = wx.StaticText(self, label="  Date of Interest:  ")
         self.editinter = wx.StaticText(self, label=todaydate)
@@ -182,13 +182,13 @@ class InputForm(wx.Frame):
 
         # calculate range date using editspan
         if self.editspan.GetValue() == '':
-            self.editspan.SetValue('30')
-            wx.MessageBox('Plot span has defaulted to 30 days!',
+            self.editspan.SetValue('29')
+            wx.MessageBox('Plot span has defaulted to 29 days!',
                           'Info', wx.OK | wx.ICON_INFORMATION)
 
         # set the span of days for the curves
         plot_span = int(self.editspan.GetValue())
-        t = array(range(t1-1, t1 + plot_span))
+        t = array(range(t1-2, t1 + plot_span))
 
         # list of names to be included in plot legend
         lgnd = []
@@ -220,11 +220,11 @@ class InputForm(wx.Frame):
         # value calculated for average of primary curves
         avg_prim = 0
         if self.cb1.GetValue():
-            self.ax.plot(label, y[0], color="red", linewidth=3, alpha=.7)
+            self.ax.plot(label, y[0], color="blue", linewidth=3, alpha=.7)
             avg_prim = y[0]
             lgnd.append('Physical')
         if self.cb2.GetValue():
-            self.ax.plot(label, y[1], color="blue", linewidth=3, alpha=.7)
+            self.ax.plot(label, y[1], color="red", linewidth=3, alpha=.7)
             avg_prim = avg_prim + y[1]
             lgnd.append('Emotional')
         if self.cb3.GetValue():
