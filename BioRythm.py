@@ -1,6 +1,7 @@
 
 import wx
 import os
+import webbrowser
 
 import wx.adv
 from wx.adv import CalendarCtrl
@@ -39,19 +40,30 @@ class InputForm(wx.Frame):
 
         self.lblDOB = wx.StaticText(self, label="  Date of Birth: *")
         self.editDOB = wx.StaticText(self, label='')
-        bmp = wx.Bitmap(os.getcwd() + os.sep + 'btnCal.ico')
         self.calDOB = wx.Button(self, id=101, size=(45, 35))
-        self.calDOB.SetBitmap(bmp)
+        self.calstart = wx.Button(self, id=102, size=(45, 35))
+        self.calinter = wx.Button(self, id=103, size=(45, 35))
+        if os.path.isfile(os.getcwd() + os.sep + 'Biorhythm' +
+                          os.sep + 'btnCal.ico'):
+            bmp = wx.Bitmap(os.getcwd() + os.sep + 'btnCal.ico')
+            self.calDOB.SetBitmap(bmp)
+            self.calstart.SetBitmap(bmp)
+            self.calinter.SetBitmap(bmp)
+        else:
+            btnlbl = 'Calendar'
+            self.calDOB.SetLabel(btnlbl)
+            self.calstart.SetLabel(btnlbl)
+            self.calinter.SetLabel(btnlbl)
+
         self.Bind(wx.EVT_BUTTON, self.OnCal, self.calDOB)
+        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calstart)
+        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calinter)
 
         self.lblstart = wx.StaticText(self, label="  Plot Start Date:  ")
         yy, mm, dd = [int(i) for i in str(date.today()).split('-')]
         # set default start date to present day
         todaydate = str(dd) + '/' + str(mm) + '/' + str(yy)
         self.editstart = wx.StaticText(self, label=todaydate)
-        self.calstart = wx.Button(self, id=102, size=(45, 35))
-        self.calstart.SetBitmap(bmp)
-        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calstart)
 
         self.lblspan = wx.StaticText(self, label="  Days in Plot:")
         # Set a default value of 29 days
@@ -59,9 +71,6 @@ class InputForm(wx.Frame):
 
         self.lblinter = wx.StaticText(self, label="  Date of Interest:  ")
         self.editinter = wx.StaticText(self, label=todaydate)
-        self.calinter = wx.Button(self, id=103, size=(45, 35))
-        self.calinter.SetBitmap(bmp)
-        self.Bind(wx.EVT_BUTTON, self.OnCal, self.calinter)        
 
         gbs.Add(self.lblname, pos=(0, 0), flag=wx.EXPAND)
         gbs.Add(self.editname, pos=(0, 1), flag=wx.EXPAND)
@@ -285,44 +294,55 @@ class InputForm(wx.Frame):
 
     def OnView(self, evt):
         import webbrowser
+        html_path = ''
+        filename = ''
 
-        filename = (os.getcwd() + os.sep + 'BiorhythmsChart.pdf')
-
-        html_path = 'file:' + os.sep*2 + filename
-
-        brwsrs = ['firefox', 'safari', 'chrome', 'opera',
-                    'netscape', 'google-chrome', 'lynx',
-                    'mozilla', 'galeon', 'chromium',
-                    'chromium-browser', 'windows-default',
-                    'w3m', 'no browser']
-        for brwsr in brwsrs:
-            try:
-                webbrowser.get(using=brwsr).open(html_path, new=2)
-                break
-            except Exception:
-                pass
+        filename = (os.getcwd() + os.sep + 'Biorhythm' + os.sep + 'BiorhythmsChart.pdf')
+        self.OpenWeb(filename)
 
     def OnSamples(self, evt):
         import webbrowser
+        html_path = ''
+        filename = ''
 
-        filename = (os.getcwd() + os.sep + 'Bio015.pdf')
-
-        html_path = 'file:' + os.sep*2 + filename
-
-        brwsrs = ['firefox', 'safari', 'chrome', 'opera',
-                    'netscape', 'google-chrome', 'lynx',
-                    'mozilla', 'galeon', 'chromium',
-                    'chromium-browser', 'windows-default',
-                    'w3m', 'no browser']
-        for brwsr in brwsrs:
-            try:
-                webbrowser.get(using=brwsr).open(html_path, new=2)
-                break
-            except Exception:
-                pass
+        filename = (os.getcwd() + os.sep + 'Biorhythm' + os.sep + 'BioSmpl.pdf')
+        self.OpenWeb(filename)
 
     def OnExit(self, evt):
         self.Destroy()
+
+    def OpenWeb(self, filename):
+        # if default location does not work then open directory finder
+        if os.path.isfile(filename) is False:
+            dlg = wx.FileDialog(self, "Open XYZ file", wildcard="PDF files (*.pdf)|*.pdf",
+                                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+
+            if dlg.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # Proceed loading the file chosen by the user
+            filename = dlg.GetPath()
+
+        html_path = 'file:' + os.sep*2 + filename
+        
+        if html_path == '':
+            wx.MessageBox('Problem Locating Biorhythm Examples File', 'Error', wx.OK)
+        else:
+            brwsrs = ['firefox', 'safari', 'chrome', 'opera',
+                      'netscape', 'google-chrome', 'lynx',
+                      'mozilla', 'galeon', 'chromium',
+                      'chromium-browser', 'windows-default',
+                      'w3m', 'no browser']
+            for brwsr in brwsrs:
+                if brwsr == 'no browser':
+                    wx.MessageBox('Problem Locating Web Browser',
+                                  'Error', wx.OK)
+                else:
+                    try:
+                        webbrowser.get(using=brwsr).open(html_path, new=2)
+                        break
+                    except Exception:
+                        pass
 
 
 class MyCalendar(wx.Dialog):
