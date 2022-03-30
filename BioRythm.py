@@ -43,9 +43,14 @@ class InputForm(wx.Frame):
         self.calDOB = wx.Button(self, id=101, size=(45, 35))
         self.calstart = wx.Button(self, id=102, size=(45, 35))
         self.calinter = wx.Button(self, id=103, size=(45, 35))
-        if os.path.isfile(os.getcwd() + os.sep + 'Biorhythm' +
-                          os.sep + 'btnCal.ico'):
-            bmp = wx.Bitmap(os.getcwd() + os.sep + 'btnCal.ico')
+        if 'Biorhythm' in os.getcwd():
+            bmp_file = (os.getcwd() + os.sep + 'btnCal.ico')
+        else:
+            bmp_file = (os.getcwd() + os.sep + 'Biorhythm' +
+                        os.sep + 'btnCal.ico')
+
+        if os.path.isfile(bmp_file):
+            bmp = wx.Bitmap(bmp_file)
             self.calDOB.SetBitmap(bmp)
             self.calstart.SetBitmap(bmp)
             self.calinter.SetBitmap(bmp)
@@ -77,18 +82,18 @@ class InputForm(wx.Frame):
 
         gbs.Add(self.lblDOB, pos=(1, 0), flag=wx.EXPAND)
         gbs.Add(self.editDOB, pos=(1, 1), flag=wx.EXPAND)
-        gbs.Add(self.calDOB, pos=(1, 2), flag=wx.EXPAND)
+        gbs.Add(self.calDOB, pos=(1, 2))
 
         gbs.Add(self.lblstart, pos=(2, 0), flag=wx.EXPAND)
         gbs.Add(self.editstart, pos=(2, 1), flag=wx.EXPAND)
-        gbs.Add(self.calstart, pos=(2, 2), flag=wx.EXPAND)
+        gbs.Add(self.calstart, pos=(2, 2))
 
         gbs.Add(self.lblspan, pos=(3, 0), flag=wx.EXPAND)
         gbs.Add(self.editspan, pos=(3, 1), flag=wx.EXPAND)
 
         gbs.Add(self.lblinter, pos=(4, 0), flag=wx.EXPAND)
         gbs.Add(self.editinter, pos=(4, 1), flag=wx.EXPAND)
-        gbs.Add(self.calinter, pos=(4, 2), flag=wx.EXPAND)        
+        gbs.Add(self.calinter, pos=(4, 2))
 
         # set up the check boxs for the charts to be ploted
         hdr1 = wx.StaticText(self, id=wx.ID_ANY, label='Primary\nCurves')
@@ -120,12 +125,8 @@ class InputForm(wx.Frame):
                                  label="Plot Selected\nCurves")
         # add button to open document explaining BIORHYTHM charts
         biodoc = wx.Button(self, id=wx.ID_ANY, label='Review\nDocumentation')
-        xit = wx.Button(self, id=wx.ID_ANY, label="Exit")
+        xit = wx.Button(self, id=wx.ID_ANY, label="Exit", size=(65,35))
         samples = wx.Button(self, id=wx.ID_ANY, label='Sample\nInterpretations')
-
-#        btnsizer.Add(self.primary, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-#        btnsizer.Add(biodoc, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-#        btnsizer.Add(xit, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         self.Bind(wx.EVT_BUTTON, self.OnExit, xit)
         self.Bind(wx.EVT_BUTTON, self.OnPrimary, self.primary)
@@ -293,19 +294,22 @@ class InputForm(wx.Frame):
         self.canvas.draw()
 
     def OnView(self, evt):
-        import webbrowser
         html_path = ''
         filename = ''
-
-        filename = (os.getcwd() + os.sep + 'Biorhythm' + os.sep + 'BiorhythmsChart.pdf')
+        if 'Biorhythm' in os.getcwd():
+            filename = (os.getcwd() + os.sep + 'BiorhythmsChart.pdf')
+        else:
+            filename = (os.getcwd() + os.sep + 'Biorhythm' +
+                        os.sep + 'BiorhythmsChart.pdf')
         self.OpenWeb(filename)
 
     def OnSamples(self, evt):
-        import webbrowser
         html_path = ''
         filename = ''
-
-        filename = (os.getcwd() + os.sep + 'Biorhythm' + os.sep + 'BioSmpl.pdf')
+        if 'Biorhythm' in os.getcwd():
+            filename = (os.getcwd() + os.sep + 'BioSmpl.pdf')
+        else:
+            filename = (os.getcwd() + os.sep + 'Biorhythm' + os.sep + 'BioSmpl.pdf')
         self.OpenWeb(filename)
 
     def OnExit(self, evt):
